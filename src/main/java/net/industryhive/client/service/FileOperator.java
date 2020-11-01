@@ -1,5 +1,6 @@
 package net.industryhive.client.service;
 
+import net.industryhive.client.config.ConfigLoader;
 import net.industryhive.client.protocol.BaseProtocol;
 
 import java.io.DataInputStream;
@@ -16,14 +17,14 @@ import java.net.Socket;
 public class FileOperator {
     public static int upload(String fileName, FileInputStream fis) {
         if (fis == null) return 1;
-        Socket storageSocket = null;
+        Socket socket = null;
         DataOutputStream dos = null;
         DataInputStream dis = null;
         try {
             String storageAddr = Contactor.contact(BaseProtocol.UPLOAD_COMMAND);
 
-            storageSocket = new Socket(InetAddress.getByName(storageAddr), 19094);
-            dos = new DataOutputStream(storageSocket.getOutputStream());
+            socket = new Socket(InetAddress.getByName(storageAddr), Integer.parseInt(ConfigLoader.STORAGE_PORT));
+            dos = new DataOutputStream(socket.getOutputStream());
             dos.write(Contactor.getHeader(BaseProtocol.UPLOAD_COMMAND));
 
             byte[] fileBytes = new byte[1024];
@@ -31,8 +32,8 @@ public class FileOperator {
             while (fis.read(fileBytes) != -1) {
                 dos.write(fileBytes);
             }
-            storageSocket.shutdownOutput();
-            dis = new DataInputStream(storageSocket.getInputStream());
+            socket.shutdownOutput();
+            dis = new DataInputStream(socket.getInputStream());
             int status = dis.read();
             String result = dis.readUTF();
             if (status != 200) {
@@ -49,8 +50,8 @@ public class FileOperator {
                 if (dos != null) {
                     dos.close();
                 }
-                if (storageSocket != null) {
-                    storageSocket.close();
+                if (socket != null) {
+                    socket.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -65,7 +66,7 @@ public class FileOperator {
         DataInputStream dis = null;
         try {
             String storageAddr = Contactor.contact(filePath);
-            socket = new Socket(InetAddress.getByName(storageAddr), 19094);
+            socket = new Socket(InetAddress.getByName(storageAddr), Integer.parseInt(ConfigLoader.STORAGE_PORT));
             dos = new DataOutputStream(socket.getOutputStream());
             dis = new DataInputStream(socket.getInputStream());
             dos.write(Contactor.getHeader(BaseProtocol.DOWNLOAD_COMMAND));
