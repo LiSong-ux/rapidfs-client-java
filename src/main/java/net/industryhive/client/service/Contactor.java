@@ -1,6 +1,7 @@
 package net.industryhive.client.service;
 
 import net.industryhive.client.config.ConfigLoader;
+import net.industryhive.client.entity.RapidMessage;
 import net.industryhive.client.protocol.BaseProtocol;
 
 import java.io.DataInputStream;
@@ -17,11 +18,11 @@ import java.util.Random;
 public class Contactor {
     private static final Random random = new Random();
 
-    public static String contact(byte command) {
+    public static RapidMessage contact(byte command) {
         Socket trackerSocket = null;
         DataOutputStream trackerDOS = null;
         DataInputStream trackerDIS = null;
-        String storageAddr = null;
+        RapidMessage rapidMsg=new RapidMessage(3,"Storage Not Found");
         try {
             int index = random.nextInt(ConfigLoader.TRACKER_ADDR.length);
             InetAddress address = InetAddress.getByName(ConfigLoader.TRACKER_ADDR[index]);
@@ -30,7 +31,10 @@ public class Contactor {
             byte[] header = getHeader(command);
             trackerDOS.write(header);
             trackerDIS = new DataInputStream(trackerSocket.getInputStream());
-            storageAddr = trackerDIS.readUTF();
+            int status = trackerDIS.read();
+            String result = trackerDIS.readUTF();
+            rapidMsg.setStatus(status);
+            rapidMsg.setResult(result);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -48,14 +52,14 @@ public class Contactor {
                 e.printStackTrace();
             }
         }
-        return storageAddr;
+        return rapidMsg;
     }
 
-    public static String contact(String filePath) {
+    public static RapidMessage contact(String filePath) {
         Socket trackerSocket = null;
         DataOutputStream trackerDOS = null;
         DataInputStream trackerDIS = null;
-        String storageAddr = null;
+        RapidMessage rapidMsg=new RapidMessage(3,"Storage Not Found");
         try {
             trackerSocket = new Socket(InetAddress.getByName("127.0.0.1"), 19093);
             trackerDOS = new DataOutputStream(trackerSocket.getOutputStream());
@@ -63,7 +67,10 @@ public class Contactor {
             trackerDOS.write(header);
             trackerDOS.writeUTF(filePath);
             trackerDIS = new DataInputStream(trackerSocket.getInputStream());
-            storageAddr = trackerDIS.readUTF();
+            int status=trackerDIS.read();
+            String result = trackerDIS.readUTF();
+            rapidMsg.setStatus(status);
+            rapidMsg.setResult(result);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -81,7 +88,7 @@ public class Contactor {
                 e.printStackTrace();
             }
         }
-        return storageAddr;
+        return rapidMsg;
     }
 
     public static byte[] getHeader(byte command) {

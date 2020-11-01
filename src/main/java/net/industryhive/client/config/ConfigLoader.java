@@ -16,7 +16,7 @@ public class ConfigLoader {
     public static String STORAGE_PORT;
 
     static {
-        ClassPathResource resource = new ClassPathResource("rapidfs.properties");
+        ClassPathResource resource = new ClassPathResource("rapidfs.properties.sample");
         try {
             File configFile = resource.getFile();
             FileReader fileReader = new FileReader(configFile);

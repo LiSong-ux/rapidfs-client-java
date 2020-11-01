@@ -1,0 +1,3 @@
+tracker.addr=127.0.0.1
+tracker.port=19093
+storage.port=19094
