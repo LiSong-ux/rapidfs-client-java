@@ -22,13 +22,13 @@ public class Contactor {
         Socket trackerSocket = null;
         DataOutputStream trackerDOS = null;
         DataInputStream trackerDIS = null;
-        RapidMessage rapidMsg=new RapidMessage(3,"Storage Not Found");
+        RapidMessage rapidMsg = new RapidMessage(3, "Storage Not Found");
         try {
             int index = random.nextInt(ConfigLoader.TRACKER_ADDR.length);
             InetAddress address = InetAddress.getByName(ConfigLoader.TRACKER_ADDR[index]);
             trackerSocket = new Socket(address, 19093);
             trackerDOS = new DataOutputStream(trackerSocket.getOutputStream());
-            byte[] header = getHeader(command);
+            byte[] header = getHeader((byte) 0, command);
             trackerDOS.write(header);
             trackerDIS = new DataInputStream(trackerSocket.getInputStream());
             int status = trackerDIS.read();
@@ -59,15 +59,15 @@ public class Contactor {
         Socket trackerSocket = null;
         DataOutputStream trackerDOS = null;
         DataInputStream trackerDIS = null;
-        RapidMessage rapidMsg=new RapidMessage(3,"Storage Not Found");
+        RapidMessage rapidMsg = new RapidMessage(3, "Storage Not Found");
         try {
             trackerSocket = new Socket(InetAddress.getByName("127.0.0.1"), 19093);
             trackerDOS = new DataOutputStream(trackerSocket.getOutputStream());
-            byte[] header = getHeader(BaseProtocol.DOWNLOAD_COMMAND);
+            byte[] header = getHeader((byte) 0, BaseProtocol.DOWNLOAD_COMMAND);
             trackerDOS.write(header);
             trackerDOS.writeUTF(filePath);
             trackerDIS = new DataInputStream(trackerSocket.getInputStream());
-            int status=trackerDIS.read();
+            int status = trackerDIS.read();
             String result = trackerDIS.readUTF();
             rapidMsg.setStatus(status);
             rapidMsg.setResult(result);
@@ -91,10 +91,14 @@ public class Contactor {
         return rapidMsg;
     }
 
-    public static byte[] getHeader(byte command) {
-        byte[] header = new byte[8];
-        System.arraycopy(BaseProtocol.RECOGNIZE, 0, header, 0, 7);
-        header[7] = command;
+    public static byte[] getHeader(byte sys, byte command) {
+        byte[] header = new byte[9];
+        if (sys == 0) {
+            System.arraycopy(BaseProtocol.RECOGNIZE_TRACKER, 0, header, 0, 8);
+        } else {
+            System.arraycopy(BaseProtocol.RECOGNIZE_STORAGE, 0, header, 0, 8);
+        }
+        header[8] = command;
         return header;
     }
 }

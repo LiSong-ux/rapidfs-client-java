@@ -24,20 +24,22 @@ public class FileOperator {
         Socket storageSocket = null;
         DataOutputStream dos = null;
         DataInputStream dis = null;
-        String storageAddr = null;
+        String filePath = null;
         try {
             RapidMessage contactMsg = Contactor.contact(BaseProtocol.UPLOAD_COMMAND);
             if (contactMsg.getStatus() != 200) {
                 System.out.println(contactMsg.getResult());
                 return null;
             }
+            System.out.println(contactMsg.getResult());
             storageSocket = new Socket(InetAddress.getByName(contactMsg.getResult()), Integer.parseInt(ConfigLoader.STORAGE_PORT));
             dos = new DataOutputStream(storageSocket.getOutputStream());
-            dos.write(Contactor.getHeader(BaseProtocol.UPLOAD_COMMAND));
+            dos.write(Contactor.getHeader((byte) 1, BaseProtocol.UPLOAD_COMMAND));
             dos.writeUTF(fileName);
             byte[] fileBytes = new byte[1024];
-            while (fis.read(fileBytes) != -1) {
-                dos.write(fileBytes);
+            int length;
+            while ((length = fis.read(fileBytes)) != -1) {
+                dos.write(fileBytes, 0, length);
             }
             storageSocket.shutdownOutput();
             dis = new DataInputStream(storageSocket.getInputStream());
@@ -47,8 +49,8 @@ public class FileOperator {
                 System.out.println(result);
                 return null;
             }
-            storageAddr = result;
-            System.out.println("Upload Success: " + storageAddr);
+            filePath = result;
+            System.out.println("Upload Success: " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -67,7 +69,7 @@ public class FileOperator {
                 e.printStackTrace();
             }
         }
-        return storageAddr;
+        return filePath;
     }
 
     public static DataInputStream download(String filePath) {
@@ -83,7 +85,7 @@ public class FileOperator {
             storageSocket = new Socket(InetAddress.getByName(contactMsg.getResult()), Integer.parseInt(ConfigLoader.STORAGE_PORT));
             dos = new DataOutputStream(storageSocket.getOutputStream());
             dis = new DataInputStream(storageSocket.getInputStream());
-            dos.write(Contactor.getHeader(BaseProtocol.DOWNLOAD_COMMAND));
+            dos.write(Contactor.getHeader((byte) 1, BaseProtocol.DOWNLOAD_COMMAND));
             dos.writeUTF(filePath);
             int status = dis.read();
             String result = dis.readUTF();
