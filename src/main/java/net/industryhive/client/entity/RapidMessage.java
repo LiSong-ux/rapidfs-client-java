@@ -7,9 +7,10 @@ package net.industryhive.client.entity;
 public class RapidMessage {
     private int status;
     private String result;
-    public RapidMessage(int status,String result){
-        this.status=status;
-        this.result=result;
+
+    public RapidMessage(int status, String result) {
+        this.status = status;
+        this.result = result;
     }
 
     public int getStatus() {
