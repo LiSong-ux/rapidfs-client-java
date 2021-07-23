@@ -10,4 +10,5 @@ public class BaseProtocol {
     public static final byte UPLOAD_COMMAND = 0;
     public static final byte DOWNLOAD_COMMAND = 1;
     public static final byte QUERY_COMMAND = 2;
+    public static final byte DELETE_COMMAND = 3;
 }
