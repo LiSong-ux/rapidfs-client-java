@@ -1,4 +1,4 @@
-package net.industryhive.client.service;
+package net.industryhive.client.connect;
 
 import net.industryhive.client.config.ConfigLoader;
 import net.industryhive.client.entity.RapidMessage;
